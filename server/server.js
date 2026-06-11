@@ -1,4 +1,4 @@
-﻿const express = require('express');
+﻿﻿﻿﻿const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
@@ -145,15 +145,25 @@ app.get('/api/daily-challenge/leaderboard', (req, res) => {
   });
 });
 
+function isValidDateKey(dateStr) {
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!regex.test(dateStr)) return false;
+  const d = new Date(dateStr);
+  return d instanceof Date && !isNaN(d) && dateStr === getDateKey(d);
+}
+
 app.post('/api/daily-challenge/score', (req, res) => {
-  const { time, playerName, playerId, moves } = req.body;
+  const { time, playerName, playerId, moves, challengeDate } = req.body;
   
   if (typeof time !== 'number' || time <= 0) {
     return res.status(400).json({ error: '无效的成绩数据' });
   }
 
-  const dateKey = getDateKey();
-  const challenge = getOrCreateDailyChallenge(dateKey);
+  if (!challengeDate || !isValidDateKey(challengeDate)) {
+    return res.status(400).json({ error: '无效的挑战日期，格式应为 YYYY-MM-DD' });
+  }
+
+  const challenge = getOrCreateDailyChallenge(challengeDate);
 
   const entry = {
     id: Date.now() + Math.random(),
@@ -161,6 +171,7 @@ app.post('/api/daily-challenge/score', (req, res) => {
     moves: moves || 0,
     playerName: playerName || '匿名玩家',
     playerId: playerId || null,
+    challengeDate: challengeDate,
     submittedAt: new Date().toISOString()
   };
 

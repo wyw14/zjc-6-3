@@ -304,6 +304,13 @@ async function submitScore() {
     let response, data;
     
     if (gameMode === 'daily') {
+      const challengeDate = dailyChallengeData ? dailyChallengeData.date : null;
+      
+      if (!challengeDate) {
+        alert('挑战日期无效，请刷新页面重试');
+        return;
+      }
+      
       response = await fetch(`${API_BASE_URL}/daily-challenge/score`, {
         method: 'POST',
         headers: {
@@ -313,7 +320,8 @@ async function submitScore() {
           time: timeInSeconds,
           playerName: playerName,
           playerId: playerId,
-          moves: moves
+          moves: moves,
+          challengeDate: challengeDate
         })
       });
     } else {

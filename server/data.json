@@ -23,6 +23,15 @@
       ],
       "leaderboard": [
         {
+          "id": 1781214735031.9275,
+          "time": 25,
+          "moves": 12,
+          "playerName": "??D",
+          "playerId": "p4",
+          "challengeDate": "2026-06-12",
+          "submittedAt": "2026-06-11T21:52:15.031Z"
+        },
+        {
           "id": 1781210529208.4126,
           "time": 45,
           "moves": 20,
@@ -38,6 +47,54 @@
           "hasCompleted": true,
           "playerName": "????",
           "lastSubmit": "2026-06-11T20:42:09.208Z"
+        },
+        "p4": {
+          "bestTime": 25,
+          "bestMoves": 12,
+          "hasCompleted": true,
+          "playerName": "??D",
+          "lastSubmit": "2026-06-11T21:52:15.031Z"
+        }
+      }
+    },
+    "2026-06-11": {
+      "date": "2026-06-11",
+      "cards": [
+        7,
+        3,
+        6,
+        3,
+        2,
+        6,
+        4,
+        7,
+        8,
+        1,
+        1,
+        8,
+        5,
+        2,
+        5,
+        4
+      ],
+      "leaderboard": [
+        {
+          "id": 1781214734998.8682,
+          "time": 35,
+          "moves": 18,
+          "playerName": "??C",
+          "playerId": "p3",
+          "challengeDate": "2026-06-11",
+          "submittedAt": "2026-06-11T21:52:14.998Z"
+        }
+      ],
+      "playerRecords": {
+        "p3": {
+          "bestTime": 35,
+          "bestMoves": 18,
+          "hasCompleted": true,
+          "playerName": "??C",
+          "lastSubmit": "2026-06-11T21:52:14.998Z"
         }
       }
     }
