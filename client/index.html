@@ -9,6 +9,26 @@
 <body>
   <div class="container">
     <h1>🃏 翻牌配对小游戏</h1>
+
+    <div class="mode-switch">
+      <button id="normalModeBtn" class="mode-btn active">🎮 普通模式</button>
+      <button id="dailyModeBtn" class="mode-btn">🔥 每日挑战</button>
+    </div>
+
+    <div id="dailyStatus" class="daily-status hidden">
+      <div class="status-item">
+        <span class="status-label">📅 今日挑战</span>
+        <span id="todayDate" class="status-value">-</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">✅ 状态</span>
+        <span id="completionStatus" class="status-value">未完成</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">🏅 最佳成绩</span>
+        <span id="dailyBestTime" class="status-value">-</span>
+      </div>
+    </div>
     
     <div class="game-info">
       <div class="info-item">
@@ -34,9 +54,10 @@
 
     <div id="winModal" class="modal hidden">
       <div class="modal-content">
-        <h2>🎉 恭喜通关！</h2>
+        <h2 id="winTitle">🎉 恭喜通关！</h2>
         <p>你的成绩：<span id="finalTime">00:00</span></p>
         <p>总步数：<span id="finalMoves">0</span></p>
+        <p id="newRecordHint" class="new-record hidden">🎊 新纪录！</p>
         <div class="input-group">
           <label for="playerName">输入你的名字：</label>
           <input type="text" id="playerName" placeholder="匿名玩家" maxlength="10">
@@ -48,7 +69,7 @@
 
     <div id="leaderboardModal" class="modal hidden">
       <div class="modal-content">
-        <h2>🏆 排行榜</h2>
+        <h2 id="leaderboardTitle">🏆 排行榜</h2>
         <ol id="leaderboardList" class="leaderboard-list"></ol>
         <button id="closeLeaderboardBtn" class="btn btn-secondary">关闭</button>
       </div>

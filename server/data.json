@@ -1,0 +1,45 @@
+{
+  "leaderboard": [],
+  "dailyChallenges": {
+    "2026-06-12": {
+      "date": "2026-06-12",
+      "cards": [
+        7,
+        2,
+        8,
+        7,
+        6,
+        3,
+        5,
+        1,
+        8,
+        3,
+        2,
+        5,
+        6,
+        1,
+        4,
+        4
+      ],
+      "leaderboard": [
+        {
+          "id": 1781210529208.4126,
+          "time": 45,
+          "moves": 20,
+          "playerName": "????",
+          "playerId": "test_player_001",
+          "submittedAt": "2026-06-11T20:42:09.208Z"
+        }
+      ],
+      "playerRecords": {
+        "test_player_001": {
+          "bestTime": 45,
+          "bestMoves": 20,
+          "hasCompleted": true,
+          "playerName": "????",
+          "lastSubmit": "2026-06-11T20:42:09.208Z"
+        }
+      }
+    }
+  }
+}

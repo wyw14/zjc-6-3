@@ -30,6 +30,71 @@ h1 {
   font-size: 2em;
 }
 
+.mode-switch {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.mode-btn {
+  flex: 1;
+  max-width: 200px;
+  padding: 12px 20px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  background: white;
+  color: #666;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.mode-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.mode-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.daily-status {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
+  border-radius: 12px;
+  padding: 15px;
+  border: 2px solid #ffc066;
+}
+
+.daily-status.hidden {
+  display: none;
+}
+
+.status-item {
+  text-align: center;
+}
+
+.status-label {
+  display: block;
+  font-size: 0.85em;
+  color: #996600;
+  margin-bottom: 5px;
+}
+
+.status-value {
+  display: block;
+  font-size: 1.3em;
+  font-weight: bold;
+  color: #cc6600;
+}
+
 .game-info {
   display: flex;
   justify-content: space-around;
@@ -175,6 +240,8 @@ h1 {
   max-width: 400px;
   width: 90%;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .modal-content h2 {
@@ -186,6 +253,22 @@ h1 {
   margin-bottom: 10px;
   color: #666;
   font-size: 1.1em;
+}
+
+.new-record {
+  color: #ff6600 !important;
+  font-weight: bold;
+  font-size: 1.2em !important;
+  animation: pulse 1s infinite;
+}
+
+.new-record.hidden {
+  display: none;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 .modal-content .btn {
@@ -267,6 +350,12 @@ h1 {
   color: #667eea;
 }
 
+.leaderboard-list .moves {
+  font-size: 0.85em;
+  color: #999;
+  margin-left: 8px;
+}
+
 @media (max-width: 480px) {
   .container {
     padding: 20px;
@@ -283,5 +372,18 @@ h1 {
   .game-info {
     flex-direction: column;
     gap: 10px;
+  }
+
+  .daily-status {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mode-switch {
+    flex-direction: column;
+  }
+
+  .mode-btn {
+    max-width: 100%;
   }
 }

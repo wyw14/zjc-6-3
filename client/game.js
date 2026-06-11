@@ -1,14 +1,14 @@
-﻿const API_BASE_URL = 'http://localhost:6032/api';
+const API_BASE_URL = 'http://localhost:6032/api';
 
 const CARD_EMOJIS = {
-  1: '馃惗',
-  2: '馃惐',
-  3: '馃惣',
-  4: '馃',
-  5: '馃',
-  6: '馃惛',
-  7: '馃惖',
-  8: '馃惃'
+  1: '🍎',
+  2: '🍊',
+  3: '🍋',
+  4: '🍇',
+  5: '🍓',
+  6: '🍒',
+  7: '🍑',
+  8: '🥝'
 };
 
 const gameBoard = document.getElementById('gameBoard');
@@ -26,6 +26,16 @@ const submitScoreBtn = document.getElementById('submitScoreBtn');
 const playAgainBtn = document.getElementById('playAgainBtn');
 const closeLeaderboardBtn = document.getElementById('closeLeaderboardBtn');
 const leaderboardList = document.getElementById('leaderboardList');
+const leaderboardTitle = document.getElementById('leaderboardTitle');
+const winTitle = document.getElementById('winTitle');
+const newRecordHint = document.getElementById('newRecordHint');
+
+const normalModeBtn = document.getElementById('normalModeBtn');
+const dailyModeBtn = document.getElementById('dailyModeBtn');
+const dailyStatus = document.getElementById('dailyStatus');
+const todayDateEl = document.getElementById('todayDate');
+const completionStatusEl = document.getElementById('completionStatus');
+const dailyBestTimeEl = document.getElementById('dailyBestTime');
 
 let cards = [];
 let flippedCards = [];
@@ -37,9 +47,50 @@ let elapsedTime = 0;
 let gameStarted = false;
 let isProcessing = false;
 
+let gameMode = 'normal';
+let dailyChallengeData = null;
+
+function getPlayerId() {
+  let playerId = localStorage.getItem('playerId');
+  if (!playerId) {
+    playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('playerId', playerId);
+  }
+  return playerId;
+}
+
+function getSavedPlayerName() {
+  return localStorage.getItem('playerName') || '';
+}
+
+function savePlayerName(name) {
+  if (name) {
+    localStorage.setItem('playerName', name);
+  }
+}
+
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
 async function initGame() {
   resetGameState();
-  const shuffledCards = await fetchShuffledCards();
+  let shuffledCards;
+  
+  if (gameMode === 'daily') {
+    await loadDailyChallenge();
+    if (dailyChallengeData) {
+      shuffledCards = dailyChallengeData.cards;
+      updateDailyStatusUI();
+    } else {
+      shuffledCards = await fetchShuffledCards();
+    }
+  } else {
+    shuffledCards = await fetchShuffledCards();
+  }
+  
   renderCards(shuffledCards);
 }
 
@@ -61,6 +112,7 @@ function resetGameState() {
   movesEl.textContent = '0';
   matchedEl.textContent = '0/8';
   gameBoard.innerHTML = '';
+  newRecordHint.classList.add('hidden');
 }
 
 async function fetchShuffledCards() {
@@ -69,7 +121,7 @@ async function fetchShuffledCards() {
     const data = await response.json();
     return data.cards;
   } catch (error) {
-    console.error('鑾峰彇娲楃墝鏁版嵁澶辫触:', error);
+    console.error('获取洗牌数据失败:', error);
     const fallbackCards = [];
     for (let i = 1; i <= 8; i++) {
       fallbackCards.push(i, i);
@@ -79,6 +131,39 @@ async function fetchShuffledCards() {
       [fallbackCards[i], fallbackCards[j]] = [fallbackCards[j], fallbackCards[i]];
     }
     return fallbackCards;
+  }
+}
+
+async function loadDailyChallenge() {
+  try {
+    const playerId = getPlayerId();
+    const response = await fetch(`${API_BASE_URL}/daily-challenge?playerId=${playerId}`);
+    dailyChallengeData = await response.json();
+    return dailyChallengeData;
+  } catch (error) {
+    console.error('获取每日挑战失败:', error);
+    dailyChallengeData = null;
+    return null;
+  }
+}
+
+function updateDailyStatusUI() {
+  if (!dailyChallengeData) return;
+  
+  todayDateEl.textContent = dailyChallengeData.date;
+  
+  if (dailyChallengeData.hasCompleted) {
+    completionStatusEl.textContent = '已完成 ✓';
+    completionStatusEl.style.color = '#009933';
+  } else {
+    completionStatusEl.textContent = '未完成';
+    completionStatusEl.style.color = '#cc6600';
+  }
+  
+  if (dailyChallengeData.playerBest) {
+    dailyBestTimeEl.textContent = formatTime(dailyChallengeData.playerBest);
+  } else {
+    dailyBestTimeEl.textContent = '-';
   }
 }
 
@@ -94,7 +179,7 @@ function renderCards(cardIds) {
     
     const cardFront = document.createElement('div');
     cardFront.className = 'card-face card-front';
-    cardFront.textContent = CARD_EMOJIS[cardId] || '鉂?;
+    cardFront.textContent = CARD_EMOJIS[cardId] || '❓';
     
     card.appendChild(cardBack);
     card.appendChild(cardFront);
@@ -187,56 +272,111 @@ function endGame() {
   finalTimeEl.textContent = timerEl.textContent;
   finalMovesEl.textContent = moves;
   
+  playerNameInput.value = getSavedPlayerName();
+  
+  if (gameMode === 'daily') {
+    winTitle.textContent = '🔥 每日挑战通关！';
+    if (dailyChallengeData && dailyChallengeData.playerBest) {
+      const currentTime = Math.floor(elapsedTime / 1000);
+      if (currentTime < dailyChallengeData.playerBest) {
+        newRecordHint.classList.remove('hidden');
+      }
+    } else if (!dailyChallengeData || !dailyChallengeData.hasCompleted) {
+      newRecordHint.classList.remove('hidden');
+    }
+  } else {
+    winTitle.textContent = '🎉 恭喜通关！';
+  }
+  
   setTimeout(() => {
     winModal.classList.remove('hidden');
   }, 500);
 }
 
 async function submitScore() {
-  const playerName = playerNameInput.value.trim() || '鍖垮悕鐜╁';
+  const playerName = playerNameInput.value.trim() || '匿名玩家';
+  savePlayerName(playerName);
+  
   const timeInSeconds = Math.floor(elapsedTime / 1000);
+  const playerId = getPlayerId();
 
   try {
-    const response = await fetch(`${API_BASE_URL}/score`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        time: timeInSeconds,
-        playerName: playerName
-      })
-    });
+    let response, data;
+    
+    if (gameMode === 'daily') {
+      response = await fetch(`${API_BASE_URL}/daily-challenge/score`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          time: timeInSeconds,
+          playerName: playerName,
+          playerId: playerId,
+          moves: moves
+        })
+      });
+    } else {
+      response = await fetch(`${API_BASE_URL}/score`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          time: timeInSeconds,
+          playerName: playerName
+        })
+      });
+    }
 
-    const data = await response.json();
+    data = await response.json();
     
     if (data.success) {
-      alert(`鎭枩锛佷綘鎺掑悕绗?${data.rank} 鍚嶏紒`);
+      if (data.isNewRecord) {
+        newRecordHint.classList.remove('hidden');
+      }
+      alert(`恭喜！你排名第 ${data.rank} 名！`);
       winModal.classList.add('hidden');
+      
+      if (gameMode === 'daily') {
+        await loadDailyChallenge();
+        updateDailyStatusUI();
+      }
+      
       showLeaderboard();
     }
   } catch (error) {
-    console.error('鎻愪氦鎴愮哗澶辫触:', error);
-    alert('鎻愪氦鎴愮哗澶辫触锛岃绋嶅悗閲嶈瘯');
+    console.error('提交成绩失败:', error);
+    alert('提交成绩失败，请稍后重试');
   }
 }
 
 async function showLeaderboard() {
   try {
-    const response = await fetch(`${API_BASE_URL}/leaderboard`);
-    const data = await response.json();
-    renderLeaderboard(data.leaderboard);
+    let data;
+    
+    if (gameMode === 'daily') {
+      const response = await fetch(`${API_BASE_URL}/daily-challenge/leaderboard`);
+      data = await response.json();
+      leaderboardTitle.textContent = `🔥 每日挑战排行榜 (${data.date})`;
+      renderLeaderboard(data.leaderboard, true);
+    } else {
+      const response = await fetch(`${API_BASE_URL}/leaderboard`);
+      data = await response.json();
+      leaderboardTitle.textContent = '🏆 总排行榜';
+      renderLeaderboard(data.leaderboard, false);
+    }
   } catch (error) {
-    console.error('鑾峰彇鎺掕姒滃け璐?', error);
-    leaderboardList.innerHTML = '<li>鍔犺浇鎺掕姒滃け璐?/li>';
+    console.error('获取排行榜失败:', error);
+    leaderboardList.innerHTML = '<li>加载排行榜失败</li>';
   }
   
   leaderboardModal.classList.remove('hidden');
 }
 
-function renderLeaderboard(leaderboard) {
+function renderLeaderboard(leaderboard, showMoves) {
   if (!leaderboard || leaderboard.length === 0) {
-    leaderboardList.innerHTML = '<li class="empty-message">鏆傛棤璁板綍锛屽揩鏉ユ寫鎴樺惂锛?/li>';
+    leaderboardList.innerHTML = '<li class="empty-message">暂无记录，快来挑战吧！</li>';
     return;
   }
 
@@ -250,17 +390,43 @@ function renderLeaderboard(leaderboard) {
     const seconds = entry.time % 60;
     const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     
+    const movesStr = showMoves && entry.moves ? `<span class="moves">(${entry.moves}步)</span>` : '';
+    
     li.innerHTML = `
       <span class="rank-name">
         <span class="rank">#${index + 1}</span>
         <span class="name">${entry.playerName}</span>
       </span>
-      <span class="time">${timeStr}</span>
+      <span>
+        <span class="time">${timeStr}</span>
+        ${movesStr}
+      </span>
     `;
     
     leaderboardList.appendChild(li);
   });
 }
+
+function switchMode(mode) {
+  gameMode = mode;
+  
+  if (mode === 'daily') {
+    dailyModeBtn.classList.add('active');
+    normalModeBtn.classList.remove('active');
+    dailyStatus.classList.remove('hidden');
+  } else {
+    normalModeBtn.classList.add('active');
+    dailyModeBtn.classList.remove('active');
+    dailyStatus.classList.add('hidden');
+  }
+  
+  winModal.classList.add('hidden');
+  leaderboardModal.classList.add('hidden');
+  initGame();
+}
+
+normalModeBtn.addEventListener('click', () => switchMode('normal'));
+dailyModeBtn.addEventListener('click', () => switchMode('daily'));
 
 restartBtn.addEventListener('click', initGame);
 playAgainBtn.addEventListener('click', () => {
